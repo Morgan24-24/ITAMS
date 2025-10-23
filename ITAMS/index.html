@@ -45,9 +45,28 @@
 
         <!-- Main Content Area (dynamic content) -->
         <main class="main-content" id="main-content">
-            <!-- Dynamic content will be loaded here -->
-            <h2>Loading...</h2>
-        </main>
+  <section id="inventory-section">
+    <h2>Asset Inventory</h2>
+    <table id="assetTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Serial</th>
+          <th>Purchase Date</th>
+          <th>Cost</th>
+          <th>Warranty</th>
+          <th>Status</th>
+          <th>Assignee</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</main>
+
     </div>
 
     <!-- Add Asset Modal -->
@@ -215,8 +234,6 @@
     </div>
 
     <!-- Chart.js library for dashboard charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/data.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>
@@ -233,10 +250,5 @@
             <p id="loginError" style="color:#e74c3c;display:none;margin-top:10px;">Invalid credentials.</p>
         </div>
     </div>
-
-    <!-- Chart.js library for dashboard charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/data.js"></script>
-    <script src="js/script.js"></script>
 </body>
 </html>
