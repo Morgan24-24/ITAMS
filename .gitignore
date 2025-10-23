@@ -1,0 +1,27 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# === Python ===
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+instance/
+*.sqlite3
+
+# === FastAPI / Environment ===
+.env
+*.log
+
+# === Node / React ===
+node_modules/
+dist/
+build/
+
+# === OS Files ===
+.DS_Store
+Thumbs.db
+
+# === VS Code ===
+.vscode/
+

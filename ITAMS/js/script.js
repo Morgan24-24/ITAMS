@@ -39,7 +39,7 @@ function displayAssets(assets) {
     .join("");
 }
 
-// --- Add New Asset ---
+
 // --- Add New Asset ---
 async function addAsset(event) {
   event.preventDefault();
