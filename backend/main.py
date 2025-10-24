@@ -14,11 +14,12 @@ Base.metadata.create_all(bind=engine)
 # --- CORS setup (to allow frontend requests) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict this later
+    allow_origins=["http://localhost:3000"],  # Frontend origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+)  
+    
 
 #Routes
 @app.get("/")
