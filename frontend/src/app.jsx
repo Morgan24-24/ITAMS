@@ -3,12 +3,16 @@ import axios from 'axios'
 import Dashboard from './components/Dashboard'
 import AssetList from './components/AssetList'
 import AssetForm from './components/AssetForm'
+import Maintenance from './components/Maintenance'
+import SoftwareLicenses from './components/SoftwareLicenses'
 
 const API_BASE = 'http://127.0.0.1:8000'
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard')
   const [assets, setAssets] = useState([])
+  const [maintenance, setMaintenance] = useState([])
+  const [licenses, setLicenses] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -26,8 +30,28 @@ function App() {
     }
   }
 
+  const fetchMaintenance = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/maintenance`)
+      setMaintenance(response.data)
+    } catch (err) {
+      console.error('Error fetching maintenance:', err)
+    }
+  }
+
+  const fetchLicenses = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/licenses`)
+      setLicenses(response.data)
+    } catch (err) {
+      console.error('Error fetching licenses:', err)
+    }
+  }
+
   useEffect(() => {
     fetchAssets()
+    fetchMaintenance()
+    fetchLicenses()
   }, [])
 
   const handleCreateAsset = async (assetData) => {
@@ -55,43 +79,113 @@ function App() {
     }
   }
 
-  return (
-    <div className="App">
-      <header className="header">
-        <div className="container">
-          <h1>IT Asset Management System</h1>
-        </div>
-      </header>
+  const handleAddMaintenance = async (maintenanceData) => {
+    try {
+      setError('')
+      await axios.post(`${API_BASE}/maintenance`, maintenanceData)
+      await fetchMaintenance()
+      await fetchAssets()
+      alert('Maintenance record added successfully!')
+      return true
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to add maintenance record')
+      return false
+    }
+  }
 
-      <div className="container">
-        <nav style={{ marginBottom: '20px' }}>
-          <button 
-            className="btn" 
+  const handleAddLicense = async (licenseData) => {
+    try {
+      setError('')
+      await axios.post(`${API_BASE}/licenses`, licenseData)
+      await fetchLicenses()
+      alert('Software license added successfully!')
+      return true
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to add license')
+      return false
+    }
+  }
+
+  const handleDeleteLicense = async (licenseId) => {
+    if (window.confirm('Are you sure you want to delete this license?')) {
+      try {
+        setError('')
+        await axios.delete(`${API_BASE}/licenses/${licenseId}`)
+        await fetchLicenses()
+        alert('License deleted successfully!')
+      } catch (err) {
+        setError(err.response?.data?.detail || 'Failed to delete license')
+      }
+    }
+  }
+
+  return (
+    <div className="app-container">
+      {/* Sidebar */}
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h2>ITAMS</h2>
+        </div>
+        <div className="sidebar-menu">
+          <a 
+            className={`menu-item ${currentView === 'dashboard' ? 'active' : ''}`}
             onClick={() => setCurrentView('dashboard')}
-            style={{ marginRight: '10px' }}
           >
-            Dashboard
-          </button>
-          <button 
-            className="btn" 
+            <i>📊</i>
+            <span className="menu-text">Dashboard</span>
+          </a>
+          <a 
+            className={`menu-item ${currentView === 'assets' ? 'active' : ''}`}
             onClick={() => setCurrentView('assets')}
-            style={{ marginRight: '10px' }}
           >
-            View Assets
-          </button>
-          <button 
-            className="btn btn-success" 
+            <i>💻</i>
+            <span className="menu-text">Assets</span>
+          </a>
+          <a 
+            className={`menu-item ${currentView === 'maintenance' ? 'active' : ''}`}
+            onClick={() => setCurrentView('maintenance')}
+          >
+            <i>🔧</i>
+            <span className="menu-text">Maintenance</span>
+          </a>
+          <a 
+            className={`menu-item ${currentView === 'licenses' ? 'active' : ''}`}
+            onClick={() => setCurrentView('licenses')}
+          >
+            <i>📄</i>
+            <span className="menu-text">Licenses</span>
+          </a>
+          <a 
+            className={`menu-item ${currentView === 'create' ? 'active' : ''}`}
             onClick={() => setCurrentView('create')}
           >
-            New Asset
-          </button>
-        </nav>
+            <i>➕</i>
+            <span className="menu-text">New Asset</span>
+          </a>
+        </div>
+      </div>
 
-        {error && <div className="error">{error}</div>}
+      {/* Main Content */}
+      <div className="main-content">
+        <div className="header">
+          <h1>IT Asset Management System</h1>
+          <div className="user-info">
+            <span>Welcome, Admin</span>
+            <div className="badge badge-success">Online</div>
+          </div>
+        </div>
+
+        {error && (
+          <div className="alert alert-danger">
+            {error}
+          </div>
+        )}
 
         {currentView === 'dashboard' && (
           <Dashboard 
             assets={assets}
+            maintenance={maintenance}
+            licenses={licenses}
             onNavigate={setCurrentView}
           />
         )}
@@ -102,6 +196,27 @@ function App() {
             loading={loading}
             onDelete={handleDeleteAsset}
             onRefresh={fetchAssets}
+          />
+        )}
+
+        {currentView === 'maintenance' && (
+          <Maintenance 
+            assets={assets}
+            maintenance={maintenance}
+            onAddMaintenance={handleAddMaintenance}
+            onRefresh={() => {
+              fetchMaintenance()
+              fetchAssets()
+            }}
+          />
+        )}
+
+        {currentView === 'licenses' && (
+          <SoftwareLicenses 
+            licenses={licenses}
+            onAddLicense={handleAddLicense}
+            onDeleteLicense={handleDeleteLicense}
+            onRefresh={fetchLicenses}
           />
         )}
 

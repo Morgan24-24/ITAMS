@@ -11,7 +11,9 @@ const AssetForm = ({ onSubmit, onCancel }) => {
     cost: '',
     warranty_status: '',
     status: '',
-    assignee: ''
+    assignee: '',
+    department: '',      
+    location: ''         
   })
 
   const handleChange = (e) => {
@@ -161,6 +163,28 @@ const AssetForm = ({ onSubmit, onCancel }) => {
               type="text"
               name="assignee"
               value={formData.assignee}
+              onChange={handleChange}
+              placeholder="Optional"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>Department</label>
+            <input
+              type="text"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              placeholder="Optional"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Location</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
               onChange={handleChange}
               placeholder="Optional"
             />

@@ -15,7 +15,7 @@ Base.metadata.create_all(bind=engine)
 # --- CORS setup (to allow frontend requests) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Frontend origin
+    allow_origins=["http://localhost:3000","http://127.0.0.1:8000"],  # Frontend origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
