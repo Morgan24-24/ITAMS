@@ -11,7 +11,6 @@ from sqlalchemy import func
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
 
-
 # --- CORS setup (to allow frontend requests) ---
 app.add_middleware(
     CORSMiddleware,
@@ -21,12 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )  
     
-
 #Routes
 @app.get("/")
 def home():
     return {"message": "IT Asset Management API is running"}
-
 
 #Getting all assets
 @app.get("/assets")
