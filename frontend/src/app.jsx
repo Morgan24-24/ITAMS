@@ -118,7 +118,18 @@ function App() {
       }
     }
   }
-
+  const handleDeleteMaintenance = async (maintenanceId) => {  
+  if (window.confirm('Are you sure you want to delete this maintenance record?')) {
+    try {
+      setError('')
+      await axios.delete(`${API_BASE}/maintenance/${maintenanceId}`)
+      await fetchMaintenance()
+      alert('Maintenance record deleted successfully!')
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to delete maintenance record')
+    }
+  }
+  }
   return (
     <div className="app-container">
       {/* Sidebar */}
@@ -204,9 +215,11 @@ function App() {
             assets={assets}
             maintenance={maintenance}
             onAddMaintenance={handleAddMaintenance}
+            onDeleteMaintenance={handleDeleteMaintenance} 
             onRefresh={() => {
               fetchMaintenance()
               fetchAssets()
+              
             }}
           />
         )}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const Maintenance = ({ assets, maintenance, onAddMaintenance, onRefresh }) => {
+const Maintenance = ({ assets, maintenance, onAddMaintenance, onDeleteMaintenance, onRefresh }) => {
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     asset_id: '',
@@ -126,6 +126,7 @@ const Maintenance = ({ assets, maintenance, onAddMaintenance, onRefresh }) => {
               <th>Activity</th>
               <th>Cost</th>
               <th>Notes</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -138,6 +139,19 @@ const Maintenance = ({ assets, maintenance, onAddMaintenance, onRefresh }) => {
                 <td>{record.activity}</td>
                 <td>${record.cost?.toFixed(2) || '0.00'}</td>
                 <td>{record.notes || '-'}</td>
+                <td>
+                  <button 
+                    className="btn" 
+                    style={{ 
+                      backgroundColor: '#dc3545', 
+                      padding: '4px 8px', 
+                      fontSize: '12px' 
+                    }}
+                    onClick={() => onDeleteMaintenance(record.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

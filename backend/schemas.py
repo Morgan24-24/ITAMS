@@ -1,3 +1,4 @@
+
 from pydantic import BaseModel
 from datetime import date
 from typing import Optional
@@ -32,4 +33,3 @@ class SoftwareLicenseCreate(BaseModel):
     assigned_to: Optional[str] = None
     department: Optional[str] = None
     status: str
-

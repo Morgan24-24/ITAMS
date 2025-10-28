@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -200,6 +201,17 @@ def maintenance_costs(db: Session = Depends(get_db)):
         .all()
     )
     return {"total_cost": total, "breakdown": [dict(row._asdict()) for row in breakdown]}
+
+# --- Delete a maintenance record ---
+@app.delete("/maintenance/{maintenance_id}")
+def delete_maintenance(maintenance_id: int, db: Session = Depends(get_db)):
+    maintenance = db.query(Maintenance).filter(Maintenance.id == maintenance_id).first()
+    if not maintenance:
+        raise HTTPException(status_code=404, detail="Maintenance record not found.")
+    
+    db.delete(maintenance)
+    db.commit()
+    return {"message": f"Maintenance record {maintenance_id} deleted successfully."}
 
 @app.get("/report/asset-stats")
 def asset_stats(db: Session = Depends(get_db)):
