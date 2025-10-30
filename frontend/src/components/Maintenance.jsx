@@ -141,12 +141,7 @@ const Maintenance = ({ assets, maintenance, onAddMaintenance, onDeleteMaintenanc
                 <td>{record.notes || '-'}</td>
                 <td>
                   <button 
-                    className="btn" 
-                    style={{ 
-                      backgroundColor: '#dc3545', 
-                      padding: '4px 8px', 
-                      fontSize: '12px' 
-                    }}
+                    className="btn btn-danger btn-sm"
                     onClick={() => onDeleteMaintenance(record.id)}
                   >
                     Delete

@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import axiosInstance from '../api/axios'
+import { 
+  FiMonitor, 
+  FiCheckCircle, 
+  FiPackage, 
+  FiTool, 
+  FiFileText, 
+  FiCircle,
+  FiPlus,
+  FiList
+} from 'react-icons/fi'
 
 const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
   const [summary, setSummary] = useState(null)
+  const [showAlert, setShowAlert] = useState(true) // Add this state
   const API_BASE = 'http://127.0.0.1:8000'
 
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const response = await axios.get(`${API_BASE}/report/summary`)
+        const response = await axiosInstance.get('/report/summary')
         setSummary(response.data)
       } catch (err) {
         console.error('Error fetching summary:', err)
@@ -16,6 +27,15 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
     }
     fetchSummary()
   }, [assets, maintenance])
+
+  // Auto-hide alert after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAlert(false)
+    }, 5000) // 5 seconds
+
+    return () => clearTimeout(timer) // Cleanup
+  }, [])
 
   const totalAssets = assets.length
   const deployedAssets = assets.filter(asset => asset.status === "Active").length
@@ -26,10 +46,12 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
 
   return (
     <div>
-      {/* Success Alert */}
-      <div className="alert alert-success">
-        <strong>Success:</strong> You have successfully logged in.
-      </div>
+      {/* Success Alert - Only show if showAlert is true */}
+      {showAlert && (
+        <div className="alert alert-success">
+          <strong>Success:</strong> You have successfully logged in.
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="stats-grid">
@@ -40,7 +62,7 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
               <div className="stat-number">{totalAssets}</div>
               <div className="stat-trend">All devices</div>
             </div>
-            <div className="stat-icon">💻</div>
+            <div className="stat-icon"><FiMonitor size={24} /></div>
           </div>
         </div>
 
@@ -51,7 +73,7 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
               <div className="stat-number">{deployedAssets}</div>
               <div className="stat-trend">In use</div>
             </div>
-            <div className="stat-icon">✅</div>
+            <div className="stat-icon"><FiCheckCircle size={24} /></div>
           </div>
         </div>
 
@@ -62,7 +84,7 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
               <div className="stat-number">{availableAssets}</div>
               <div className="stat-trend">Ready to deploy</div>
             </div>
-            <div className="stat-icon">📦</div>
+            <div className="stat-icon"><FiPackage size={24} /></div>
           </div>
         </div>
 
@@ -73,7 +95,7 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
               <div className="stat-number">{underRepairAssets}</div>
               <div className="stat-trend">Being serviced</div>
             </div>
-            <div className="stat-icon">🔧</div>
+            <div className="stat-icon"><FiTool size={24} /></div>
           </div>
         </div>
 
@@ -84,7 +106,7 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
               <div className="stat-number">{totalLicenses}</div>
               <div className="stat-trend">Total licenses</div>
             </div>
-            <div className="stat-icon">📄</div>
+            <div className="stat-icon"><FiFileText size={24} /></div>
           </div>
         </div>
 
@@ -95,7 +117,7 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
               <div className="stat-number">{activeLicenses}</div>
               <div className="stat-trend">Currently active</div>
             </div>
-            <div className="stat-icon">🟢</div>
+            <div className="stat-icon"><FiCircle size={24} /></div>
           </div>
         </div>
       </div>
@@ -107,10 +129,12 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
             <div className="stat-header">
               <div className="stat-content">
                 <h3>Total Asset Cost</h3>
-                <div className="stat-number">${summary.total_asset_cost?.toFixed(2) || '0.00'}</div>
+                <div className="stat-number">₵{summary.total_asset_cost?.toFixed(2) || '0.00'}</div>
                 <div className="stat-trend">Total investment</div>
               </div>
-              <div className="stat-icon">💰</div>
+              <div className="stat-icon">
+                <span style={{ fontSize: '24px', fontWeight: 'bold' }}>₵</span>
+              </div>
             </div>
           </div>
 
@@ -118,10 +142,12 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
             <div className="stat-header">
               <div className="stat-content">
                 <h3>Maintenance Cost</h3>
-                <div className="stat-number">${summary.total_maintenance_cost?.toFixed(2) || '0.00'}</div>
+                <div className="stat-number">₵{summary.total_maintenance_cost?.toFixed(2) || '0.00'}</div>
                 <div className="stat-trend">Service expenses</div>
               </div>
-              <div className="stat-icon">🔧</div>
+              <div className="stat-icon">
+                <span style={{ fontSize: '24px', fontWeight: 'bold' }}>₵</span>
+              </div>
             </div>
           </div>
         </div>
@@ -133,7 +159,7 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
           <div className="card-header">
             <h3>Asset Overview</h3>
             <button 
-              className="btn btn-outline"
+              className="btn btn-success"
               onClick={() => onNavigate('assets')}
             >
               View All
@@ -151,19 +177,19 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
                     className="btn btn-success" 
                     onClick={() => onNavigate('create')}
                   >
-                    <span>➕</span> New Asset
+                    <FiPlus size={16} /> New Asset
                   </button>
                   <button 
                     className="btn btn-primary" 
                     onClick={() => onNavigate('maintenance')}
                   >
-                    <span>🔧</span> Add Maintenance
+                    <FiTool size={16} /> Add Maintenance
                   </button>
                   <button 
                     className="btn btn-primary" 
                     onClick={() => onNavigate('licenses')}
                   >
-                    <span>📄</span> Add License
+                    <FiFileText size={16} /> Add License
                   </button>
                 </div>
               </div>
@@ -175,25 +201,25 @@ const Dashboard = ({ assets, maintenance, licenses, onNavigate }) => {
                     className="btn btn-success" 
                     onClick={() => onNavigate('create')}
                   >
-                    <span>➕</span> New Asset
+                    <FiPlus size={16} /> New Asset
                   </button>
                   <button 
-                    className="btn btn-primary" 
+                    className="btn btn-success" 
                     onClick={() => onNavigate('assets')}
                   >
-                    <span>📋</span> View All Assets
+                    <FiList size={16} /> View All Assets
                   </button>
                   <button 
-                    className="btn btn-primary" 
+                    className="btn btn-success" 
                     onClick={() => onNavigate('maintenance')}
                   >
-                    <span>🔧</span> Maintenance
+                    <FiTool size={16} /> Maintenance
                   </button>
                   <button 
-                    className="btn btn-primary" 
+                    className="btn btn-success" 
                     onClick={() => onNavigate('licenses')}
                   >
-                    <span>📄</span> Licenses
+                    <FiFileText size={16} /> Licenses
                   </button>
                 </div>
               </div>

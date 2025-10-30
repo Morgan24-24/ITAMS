@@ -1,26 +1,57 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import axiosInstance from './api/axios'
 import Dashboard from './components/Dashboard'
 import AssetList from './components/AssetList'
 import AssetForm from './components/AssetForm'
 import Maintenance from './components/Maintenance'
 import SoftwareLicenses from './components/SoftwareLicenses'
+import Sidebar from './components/Sidebar'
+import Login from "./pages/login"
+import Signup from "./pages/Signup"
+import Department from './pages/Departments'
 
-const API_BASE = 'http://127.0.0.1:8000'
 
-function App() {
+// Protected Route Component
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+}
+
+function MainApp() {
   const [currentView, setCurrentView] = useState('dashboard')
   const [assets, setAssets] = useState([])
   const [maintenance, setMaintenance] = useState([])
   const [licenses, setLicenses] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [user, setUser] = useState(null)
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
+  }
+
+  // Fetch current user info
+  const fetchUser = async () => {
+    try {
+      const response = await axiosInstance.get('/users/me') 
+      setUser(response.data)
+    } catch (err) {
+      console.error('Error fetching user:', err)
+    }
+  }
 
   const fetchAssets = async () => {
     setLoading(true)
     setError('')
     try {
-      const response = await axios.get(`${API_BASE}/assets`)
+      const response = await axiosInstance.get('/assets')
       setAssets(response.data)
     } catch (err) {
       setError('Failed to fetch assets')
@@ -32,7 +63,7 @@ function App() {
 
   const fetchMaintenance = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/maintenance`)
+      const response = await axiosInstance.get('/maintenance')
       setMaintenance(response.data)
     } catch (err) {
       console.error('Error fetching maintenance:', err)
@@ -41,7 +72,7 @@ function App() {
 
   const fetchLicenses = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/licenses`)
+      const response = await axiosInstance.get('/licenses')
       setLicenses(response.data)
     } catch (err) {
       console.error('Error fetching licenses:', err)
@@ -49,6 +80,7 @@ function App() {
   }
 
   useEffect(() => {
+    fetchUser()
     fetchAssets()
     fetchMaintenance()
     fetchLicenses()
@@ -57,7 +89,7 @@ function App() {
   const handleCreateAsset = async (assetData) => {
     try {
       setError('')
-      await axios.post(`${API_BASE}/assets`, assetData)
+      await axiosInstance.post('/assets', assetData)
       await fetchAssets()
       setCurrentView('dashboard')
       alert('Asset created successfully!')
@@ -70,7 +102,7 @@ function App() {
     if (window.confirm('Are you sure you want to delete this asset?')) {
       try {
         setError('')
-        await axios.delete(`${API_BASE}/assets/${assetId}`)
+        await axiosInstance.delete(`/assets/${assetId}`)
         await fetchAssets()
         alert('Asset deleted successfully!')
       } catch (err) {
@@ -82,7 +114,7 @@ function App() {
   const handleAddMaintenance = async (maintenanceData) => {
     try {
       setError('')
-      await axios.post(`${API_BASE}/maintenance`, maintenanceData)
+      await axiosInstance.post('/maintenance', maintenanceData)
       await fetchMaintenance()
       await fetchAssets()
       alert('Maintenance record added successfully!')
@@ -96,7 +128,7 @@ function App() {
   const handleAddLicense = async (licenseData) => {
     try {
       setError('')
-      await axios.post(`${API_BASE}/licenses`, licenseData)
+      await axiosInstance.post('/licenses', licenseData)
       await fetchLicenses()
       alert('Software license added successfully!')
       return true
@@ -110,7 +142,7 @@ function App() {
     if (window.confirm('Are you sure you want to delete this license?')) {
       try {
         setError('')
-        await axios.delete(`${API_BASE}/licenses/${licenseId}`)
+        await axiosInstance.delete(`/licenses/${licenseId}`)
         await fetchLicenses()
         alert('License deleted successfully!')
       } catch (err) {
@@ -118,129 +150,128 @@ function App() {
       }
     }
   }
+
   const handleDeleteMaintenance = async (maintenanceId) => {  
-  if (window.confirm('Are you sure you want to delete this maintenance record?')) {
-    try {
-      setError('')
-      await axios.delete(`${API_BASE}/maintenance/${maintenanceId}`)
-      await fetchMaintenance()
-      alert('Maintenance record deleted successfully!')
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to delete maintenance record')
+    if (window.confirm('Are you sure you want to delete this maintenance record?')) {
+      try {
+        setError('')
+        await axiosInstance.delete(`/maintenance/${maintenanceId}`)
+        await fetchMaintenance()
+        alert('Maintenance record deleted successfully!')
+      } catch (err) {
+        setError(err.response?.data?.detail || 'Failed to delete maintenance record')
+      }
     }
   }
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('token')
+      window.location.href = '/'
+    }
   }
+
   return (
-    <div className="app-container">
-      {/* Sidebar */}
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2>ITAMS</h2>
-        </div>
-        <div className="sidebar-menu">
-          <a 
-            className={`menu-item ${currentView === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setCurrentView('dashboard')}
-          >
-            <i>📊</i>
-            <span className="menu-text">Dashboard</span>
-          </a>
-          <a 
-            className={`menu-item ${currentView === 'assets' ? 'active' : ''}`}
-            onClick={() => setCurrentView('assets')}
-          >
-            <i>💻</i>
-            <span className="menu-text">Assets</span>
-          </a>
-          <a 
-            className={`menu-item ${currentView === 'maintenance' ? 'active' : ''}`}
-            onClick={() => setCurrentView('maintenance')}
-          >
-            <i>🔧</i>
-            <span className="menu-text">Maintenance</span>
-          </a>
-          <a 
-            className={`menu-item ${currentView === 'licenses' ? 'active' : ''}`}
-            onClick={() => setCurrentView('licenses')}
-          >
-            <i>📄</i>
-            <span className="menu-text">Licenses</span>
-          </a>
-          <a 
-            className={`menu-item ${currentView === 'create' ? 'active' : ''}`}
-            onClick={() => setCurrentView('create')}
-          >
-            <i>➕</i>
-            <span className="menu-text">New Asset</span>
-          </a>
-        </div>
-      </div>
+  <div className="app-container">
+    {/* Sidebar */}
+    <Sidebar 
+      currentView={currentView} 
+      setCurrentView={setCurrentView}
+      isSidebarOpen={isSidebarOpen}
+      toggleSidebar={toggleSidebar}
+      onLogout={handleLogout}
+    />
 
-      {/* Main Content */}
-      <div className="main-content">
-        <div className="header">
-          <h1>IT Asset Management System</h1>
-          <div className="user-info">
-            <span>Welcome, Admin</span>
-            <div className="badge badge-success">Online</div>
+    {/* Main Content */}
+    <div className={`main-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      {error && (
+        <div className="alert alert-danger">
+          {error}
+        </div>
+      )}
+
+      {currentView === 'dashboard' && (
+        <>
+          {/* Header only for Dashboard */}
+          <div className="header">
+            <h1>AssetHub</h1>
+            <div className="user-info">
+              <span>Welcome, {user?.email || 'User'}</span>
+            </div>
           </div>
-        </div>
-
-        {error && (
-          <div className="alert alert-danger">
-            {error}
-          </div>
-        )}
-
-        {currentView === 'dashboard' && (
+          
           <Dashboard 
             assets={assets}
             maintenance={maintenance}
             licenses={licenses}
             onNavigate={setCurrentView}
           />
-        )}
+        </>
+      )}
 
-        {currentView === 'assets' && (
-          <AssetList 
-            assets={assets}
-            loading={loading}
-            onDelete={handleDeleteAsset}
-            onRefresh={fetchAssets}
-          />
-        )}
+      {currentView === 'assets' && (
+        <AssetList 
+          assets={assets}
+          loading={loading}
+          onDelete={handleDeleteAsset}
+          onRefresh={fetchAssets}
+          onNewAssetClick={() => setCurrentView('create')}
+        />
+      )}
 
-        {currentView === 'maintenance' && (
-          <Maintenance 
-            assets={assets}
-            maintenance={maintenance}
-            onAddMaintenance={handleAddMaintenance}
-            onDeleteMaintenance={handleDeleteMaintenance} 
-            onRefresh={() => {
-              fetchMaintenance()
-              fetchAssets()
-              
-            }}
-          />
-        )}
+      {currentView === 'maintenance' && (
+        <Maintenance 
+          assets={assets}
+          maintenance={maintenance}
+          onAddMaintenance={handleAddMaintenance}
+          onDeleteMaintenance={handleDeleteMaintenance} 
+          onRefresh={() => {
+            fetchMaintenance()
+            fetchAssets()
+          }}
+        />
+      )}
 
-        {currentView === 'licenses' && (
-          <SoftwareLicenses 
-            licenses={licenses}
-            onAddLicense={handleAddLicense}
-            onDeleteLicense={handleDeleteLicense}
-            onRefresh={fetchLicenses}
-          />
-        )}
+      {currentView === 'licenses' && (
+        <SoftwareLicenses 
+          licenses={licenses}
+          onAddLicense={handleAddLicense}
+          onDeleteLicense={handleDeleteLicense}
+          onRefresh={fetchLicenses}
+        />
+      )}
 
-        {currentView === 'create' && (
-          <AssetForm 
-            onSubmit={handleCreateAsset}
-            onCancel={() => setCurrentView('dashboard')}
-          />
-        )}
-      </div>
+      {currentView === 'create' && (
+        <AssetForm 
+          onSubmit={handleCreateAsset}
+          onCancel={() => setCurrentView('dashboard')}
+        />
+      )}
+
+      {currentView === 'departments' && (
+        <Department />
+      )}
     </div>
+  </div>
+)
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <MainApp />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </Router>
   )
 }
 

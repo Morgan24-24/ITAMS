@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
+import { FaPlus } from 'react-icons/fa'
 
-const AssetList = ({ assets, loading, onDelete, onRefresh }) => {
+const AssetList = ({ assets, loading, onDelete, onRefresh, onNewAssetClick }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
@@ -27,9 +28,15 @@ const AssetList = ({ assets, loading, onDelete, onRefresh }) => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2>Asset Inventory</h2>
-        <button className="btn" onClick={onRefresh}>
-          Refresh
-        </button>
+        <div>
+          <button className="btn" onClick={onRefresh} style={{ marginRight: '10px' }}>
+            Refresh
+          </button>
+          <button className="btn btn-success" onClick={onNewAssetClick}>
+            <FaPlus style={{ marginRight: '5px' }} /> {/* Optional: Add icon */}
+            New Asset
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '10px', marginBottom: '20px' }}>
@@ -110,16 +117,12 @@ const AssetList = ({ assets, loading, onDelete, onRefresh }) => {
                 <td>{asset.assignee || 'Unassigned'}</td>
                 <td>
                   <button 
-                    className="btn" 
-                    style={{ 
-                      backgroundColor: '#dc3545', 
-                      padding: '4px 8px', 
-                      fontSize: '12px' 
-                    }}
-                    onClick={() => onDelete(asset.id)}
-                  >
-                    Delete
-                  </button>
+                        className="btn btn-danger btn-sm"
+                        onClick={() => onDelete(asset.id)}
+                        title="Delete asset"
+                      >
+                        Delete
+                      </button>
                 </td>
               </tr>
             ))}

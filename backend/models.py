@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
+from sqlalchemy import func
 
 # Asset Model (Table Definition)
 
@@ -48,3 +49,25 @@ class SoftwareLicense(Base):
     assigned_to = Column(String, nullable=True)
     department = Column(String, nullable=True)
     status = Column(String, nullable=False)  # Active, Expired, Renewed
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    company = Column(String, nullable=False)
+    role = Column(String, default="Viewer")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class Department(Base):
+    __tablename__ = "departments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    location = Column(String, nullable=True)
+    code = Column(String, unique=True, nullable=False)
+    head_of_department = Column(String, nullable=True)  # NEW
+    contact_email = Column(String, nullable=True)        # NEW
+    contact_phone = Column(String, nullable=True)  
